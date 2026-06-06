@@ -1,0 +1,437 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="PocketReader.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:PocketReader"
+    Title="PocketReader">
+
+    <Grid x:Name="RootLayout" RowDefinitions="Auto,*">
+
+        <Grid.Resources>
+            <!-- Soft gradient used behind cards that have no cover image. -->
+            <LinearGradientBrush x:Key="CoverFallback" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#3360A5FF" Offset="0" />
+                <GradientStop Color="#22273C75" Offset="1" />
+            </LinearGradientBrush>
+
+            <!-- List density styles (swapped in code). -->
+            <Style x:Key="ListComfort" TargetType="ListViewItem">
+                <Setter Property="Padding" Value="4,6" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            </Style>
+            <Style x:Key="ListCompact" TargetType="ListViewItem">
+                <Setter Property="Padding" Value="4,0" />
+                <Setter Property="MinHeight" Value="0" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            </Style>
+        </Grid.Resources>
+
+        <!-- Custom title bar (drag region set in code) -->
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="40" Background="Transparent" Padding="14,0">
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <FontIcon Glyph="&#xE8F1;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                <TextBlock Text="PocketReader" VerticalAlignment="Center" FontSize="12" FontWeight="SemiBold" />
+            </StackPanel>
+        </Grid>
+
+        <NavigationView
+            x:Name="Nav"
+            Grid.Row="1"
+            IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="True"
+            PaneDisplayMode="Left"
+            OpenPaneLength="248"
+            IsPaneToggleButtonVisible="True"
+            SelectionChanged="OnNavSelectionChanged">
+
+            <NavigationView.MenuItems>
+                <NavigationViewItem x:Name="NavAll" Content="All" Tag="all" IsSelected="True">
+                    <NavigationViewItem.Icon><SymbolIcon Symbol="AllApps" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavFav" Content="Favorites" Tag="fav">
+                    <NavigationViewItem.Icon><SymbolIcon Symbol="Favorite" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavUnread" Content="Unread" Tag="unread">
+                    <NavigationViewItem.Icon><SymbolIcon Symbol="Read" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavNotes" Content="Notes" Tag="notes">
+                    <NavigationViewItem.Icon><SymbolIcon Symbol="Comment" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavHighlights" Content="Highlights" Tag="highlights">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE7E6;" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavArchive" Content="Archive" Tag="archive">
+                    <NavigationViewItem.Icon><SymbolIcon Symbol="Folder" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavRatings" Content="Ratings">
+                    <NavigationViewItem.Icon><FontIcon Glyph="&#xE735;" /></NavigationViewItem.Icon>
+                    <NavigationViewItem.MenuItems>
+                        <NavigationViewItem x:Name="NavRate5" Content="★★★★★" Tag="rating:5" />
+                        <NavigationViewItem x:Name="NavRate4" Content="★★★★" Tag="rating:4" />
+                        <NavigationViewItem x:Name="NavRate3" Content="★★★" Tag="rating:3" />
+                        <NavigationViewItem x:Name="NavRate2" Content="★★" Tag="rating:2" />
+                        <NavigationViewItem x:Name="NavRate1" Content="★" Tag="rating:1" />
+                    </NavigationViewItem.MenuItems>
+                </NavigationViewItem>
+                <NavigationViewItem x:Name="NavRecycle" Content="Recycle Bin" Tag="deleted">
+                    <NavigationViewItem.Icon><SymbolIcon Symbol="Delete" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItemSeparator />
+                <NavigationViewItemHeader x:Name="TagsHeader" Content="Tags" />
+            </NavigationView.MenuItems>
+
+            <!-- Sits at the bottom of the pane, right above Settings -->
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem x:Name="NavManageTags" Content="Manage tags" Tag="action:managetags">
+                    <NavigationViewItem.Icon><SymbolIcon Symbol="Tag" /></NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.FooterMenuItems>
+
+            <!-- Main content -->
+            <Grid RowDefinitions="Auto,*,Auto">
+                <Grid.KeyboardAccelerators>
+                    <KeyboardAccelerator Key="A" Modifiers="Control" Invoked="OnSelectAllInvoked" />
+                    <KeyboardAccelerator Key="Escape" Invoked="OnEscapeMain" />
+                </Grid.KeyboardAccelerators>
+
+                <CommandBar Grid.Row="0" DefaultLabelPosition="Right" Background="Transparent" HorizontalAlignment="Stretch">
+                    <CommandBar.Content>
+                        <TextBlock x:Name="SectionTitle" Text="All" FontSize="20" FontWeight="SemiBold" Margin="16,0,0,0" VerticalAlignment="Center" />
+                    </CommandBar.Content>
+
+                    <AppBarButton x:Name="LoginButton" Icon="Contact" Label="Sign in" ToolTipService.ToolTip="Sign in to Raindrop.io" AutomationProperties.AutomationId="LoginButton">
+                        <AppBarButton.Flyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem Text="Sign in with Raindrop (browser)" Click="OnLoginClick">
+                                    <MenuFlyoutItem.Icon><SymbolIcon Symbol="Globe" /></MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="Sign in with a token…" Click="OnTokenLoginClick">
+                                    <MenuFlyoutItem.Icon><SymbolIcon Symbol="Permissions" /></MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                            </MenuFlyout>
+                        </AppBarButton.Flyout>
+                    </AppBarButton>
+                    <AppBarButton x:Name="SyncButton" Icon="Sync" Label="Sync" IsEnabled="False" ToolTipService.ToolTip="Fetch bookmarks from Raindrop" AutomationProperties.AutomationId="SyncButton">
+                        <AppBarButton.Flyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem Text="Sync new bookmarks" Click="OnSyncNewClick">
+                                    <MenuFlyoutItem.Icon><SymbolIcon Symbol="Sync" /></MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="Full re-sync (all)" Click="OnSyncAllClick">
+                                    <MenuFlyoutItem.Icon><SymbolIcon Symbol="Refresh" /></MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                            </MenuFlyout>
+                        </AppBarButton.Flyout>
+                    </AppBarButton>
+                    <AppBarButton x:Name="DownloadButton" Icon="Download" Label="Download" Click="OnDownloadOfflineClick" IsEnabled="False" ToolTipService.ToolTip="Cache this view for offline reading" AutomationProperties.AutomationId="DownloadButton" />
+                    <AppBarSeparator />
+                    <AppBarToggleButton x:Name="CardToggle" Icon="ViewAll" Label="Cards" Click="OnViewToggle" ToolTipService.ToolTip="Toggle list / card view" AutomationProperties.AutomationId="CardToggle" />
+                    <AppBarToggleButton x:Name="SelectToggle" Icon="SelectAll" Label="Select" Click="OnSelectToggle" ToolTipService.ToolTip="Select multiple (Ctrl+A)" AutomationProperties.AutomationId="SelectToggle" />
+                    <AppBarButton x:Name="ViewButton" Icon="Sort" Label="View" ToolTipService.ToolTip="Sort &amp; density">
+                        <AppBarButton.Flyout>
+                            <MenuFlyout>
+                                <RadioMenuFlyoutItem x:Name="SortNewest" Text="Newest first" GroupName="sort" Click="OnSortChanged" Tag="DateDesc" IsChecked="True" />
+                                <RadioMenuFlyoutItem x:Name="SortOldest" Text="Oldest first" GroupName="sort" Click="OnSortChanged" Tag="DateAsc" />
+                                <RadioMenuFlyoutItem x:Name="SortTitle" Text="Title (A–Z)" GroupName="sort" Click="OnSortChanged" Tag="Title" />
+                                <MenuFlyoutSeparator />
+                                <RadioMenuFlyoutItem x:Name="DensityComfort" Text="Comfortable" GroupName="density" Click="OnDensityChanged" Tag="Comfortable" IsChecked="True" />
+                                <RadioMenuFlyoutItem x:Name="DensityCompact" Text="Compact" GroupName="density" Click="OnDensityChanged" Tag="Compact" />
+                            </MenuFlyout>
+                        </AppBarButton.Flyout>
+                    </AppBarButton>
+                    <AppBarButton x:Name="StatsButton" Label="Stats" Click="OnStatsClick" ToolTipService.ToolTip="Reading statistics">
+                        <AppBarButton.Icon><FontIcon Glyph="&#xE9D9;" /></AppBarButton.Icon>
+                    </AppBarButton>
+                    <AppBarElementContainer VerticalAlignment="Center">
+                        <AutoSuggestBox x:Name="SearchBox" Width="240" Margin="8,0"
+                                        PlaceholderText="Search…"
+                                        AutomationProperties.AutomationId="SearchBox"
+                                        AutomationProperties.Name="Search articles"
+                                        QuerySubmitted="OnSearchSubmitted"
+                                        TextChanged="OnSearchTextChanged">
+                            <AutoSuggestBox.QueryIcon>
+                                <SymbolIcon Symbol="Find" />
+                            </AutoSuggestBox.QueryIcon>
+                            <AutoSuggestBox.KeyboardAccelerators>
+                                <KeyboardAccelerator Key="Escape" Invoked="OnSearchEscape" />
+                            </AutoSuggestBox.KeyboardAccelerators>
+                        </AutoSuggestBox>
+                    </AppBarElementContainer>
+
+                    <CommandBar.SecondaryCommands>
+                        <AppBarButton x:Name="ResolveButton" Icon="Globe" Label="Fix links &amp; covers" Click="OnResolveLinksClick" AutomationProperties.AutomationId="ResolveButton" />
+                        <AppBarButton x:Name="AutoTagButton" Icon="Tag" Label="Auto-tag this view" Click="OnAutoTagClick" AutomationProperties.AutomationId="AutoTagButton" />
+                        <AppBarButton x:Name="EmptyBinButton" Icon="Delete" Label="Empty Recycle Bin" Click="OnEmptyBinClick" Visibility="Collapsed" />
+                    </CommandBar.SecondaryCommands>
+                </CommandBar>
+
+                <!-- LIST VIEW -->
+                <ListView
+                    x:Name="ArticlesListView"
+                    Grid.Row="1"
+                    AutomationProperties.AutomationId="ArticlesList"
+                    AutomationProperties.Name="Articles list"
+                    SelectionMode="None"
+                    IsItemClickEnabled="True"
+                    ItemClick="OnArticleClick"
+                    SelectionChanged="OnSelectionChanged"
+                    RightTapped="OnItemRightTapped">
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="local:ArticleViewModel">
+                            <Grid Padding="8,12" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                <Border Grid.ColumnSpan="3" Margin="-8,-12,-8,-12" BorderThickness="3,0,0,0" IsHitTestVisible="False"
+                                        BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+                                        Background="{ThemeResource SubtleFillColorSecondaryBrush}"
+                                        Visibility="{x:Bind SelectionVisibility, Mode=OneWay}" />
+                                <Grid Grid.Column="0">
+                                    <Image Width="32" Height="32" VerticalAlignment="Top" Source="{x:Bind FaviconUrl}" />
+                                    <Ellipse Width="10" Height="10" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-3,-3,0,0"
+                                             Fill="{ThemeResource AccentFillColorDefaultBrush}" Stroke="{ThemeResource CardBackgroundFillColorDefaultBrush}" StrokeThickness="1.5"
+                                             Visibility="{x:Bind UnreadDot, Mode=OneWay}" />
+                                </Grid>
+                                <StackPanel Grid.Column="1" Spacing="3" Opacity="{x:Bind ReadOpacity}">
+                                    <TextBlock Text="{x:Bind Title}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" MaxLines="2" />
+                                    <TextBlock Text="{x:Bind SourceName}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{x:Bind TagsDisplay}" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Visibility="{x:Bind HasTags}" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Spacing="2" HorizontalAlignment="Right">
+                                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
+                                        <FontIcon Glyph="&#xE70B;" FontSize="12" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Visibility="{x:Bind NoteVisibility, Mode=OneWay}" />
+                                        <StackPanel Orientation="Horizontal" Spacing="0" VerticalAlignment="Center">
+                                            <Button Tag="1" Click="OnStarClick" Background="Transparent" BorderThickness="0" Padding="2" MinWidth="0" MinHeight="0" CornerRadius="4" ToolTipService.ToolTip="Rate 1">
+                                                <FontIcon Glyph="{x:Bind Star1, Mode=OneWay}" FontSize="15" Foreground="#E8A33D" />
+                                            </Button>
+                                            <Button Tag="2" Click="OnStarClick" Background="Transparent" BorderThickness="0" Padding="2" MinWidth="0" MinHeight="0" CornerRadius="4" ToolTipService.ToolTip="Rate 2">
+                                                <FontIcon Glyph="{x:Bind Star2, Mode=OneWay}" FontSize="15" Foreground="#E8A33D" />
+                                            </Button>
+                                            <Button Tag="3" Click="OnStarClick" Background="Transparent" BorderThickness="0" Padding="2" MinWidth="0" MinHeight="0" CornerRadius="4" ToolTipService.ToolTip="Rate 3">
+                                                <FontIcon Glyph="{x:Bind Star3, Mode=OneWay}" FontSize="15" Foreground="#E8A33D" />
+                                            </Button>
+                                            <Button Tag="4" Click="OnStarClick" Background="Transparent" BorderThickness="0" Padding="2" MinWidth="0" MinHeight="0" CornerRadius="4" ToolTipService.ToolTip="Rate 4">
+                                                <FontIcon Glyph="{x:Bind Star4, Mode=OneWay}" FontSize="15" Foreground="#E8A33D" />
+                                            </Button>
+                                            <Button Tag="5" Click="OnStarClick" Background="Transparent" BorderThickness="0" Padding="2" MinWidth="0" MinHeight="0" CornerRadius="4" ToolTipService.ToolTip="Rate 5">
+                                                <FontIcon Glyph="{x:Bind Star5, Mode=OneWay}" FontSize="15" Foreground="#E8A33D" />
+                                            </Button>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <TextBlock Text="{x:Bind DateSavedFormatted}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Right" />
+                                    <Border Visibility="{x:Bind OfflineVisibility, Mode=OneWay}" HorizontalAlignment="Right"
+                                            Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="4" Padding="6,1">
+                                        <StackPanel Orientation="Horizontal" Spacing="3">
+                                            <FontIcon Glyph="&#xE73E;" FontSize="9" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                            <TextBlock Text="Offline" FontSize="10" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+
+                <!-- CARD VIEW -->
+                <GridView
+                    x:Name="ArticlesGridView"
+                    Grid.Row="1"
+                    AutomationProperties.AutomationId="ArticlesGrid"
+                    AutomationProperties.Name="Articles grid"
+                    Visibility="Collapsed"
+                    Padding="16"
+                    SelectionMode="None"
+                    IsItemClickEnabled="True"
+                    ItemClick="OnArticleClick"
+                    SelectionChanged="OnSelectionChanged"
+                    RightTapped="OnItemRightTapped"
+                    SizeChanged="OnCardsSizeChanged">
+                    <GridView.ItemContainerStyle>
+                        <Style TargetType="GridViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Setter Property="VerticalContentAlignment" Value="Stretch" />
+                            <Setter Property="Margin" Value="0" />
+                            <Setter Property="Padding" Value="4" />
+                        </Style>
+                    </GridView.ItemContainerStyle>
+                    <GridView.ItemTemplate>
+                        <DataTemplate x:DataType="local:ArticleViewModel">
+                            <Grid x:Name="CardRoot" CornerRadius="8" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                                  Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                  BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1"
+                                  RowDefinitions="96,*,Auto,Auto"
+                                  PointerEntered="OnCardEnter" PointerExited="OnCardExit">
+                                <!-- Cover header (image if present, else gradient + favicon) -->
+                                <Border Grid.Row="0" CornerRadius="8,8,0,0" Background="{StaticResource CoverFallback}">
+                                    <Grid>
+                                        <Image Source="{x:Bind CoverImage}" Stretch="UniformToFill" Visibility="{x:Bind CoverVisibility, Mode=OneWay}" />
+                                        <Image Width="30" Height="30" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                               Source="{x:Bind FaviconUrl}" Visibility="{x:Bind NoCoverVisibility, Mode=OneWay}" />
+                                    </Grid>
+                                </Border>
+
+                                <TextBlock Grid.Row="1" Text="{x:Bind Title}" Margin="12,8,12,0" Opacity="{x:Bind ReadOpacity}"
+                                           FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxLines="2" />
+
+                                <!-- Source row -->
+                                <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="6" Margin="12,6,12,0" VerticalAlignment="Center">
+                                    <Image Width="14" Height="14" Source="{x:Bind FaviconUrl}" VerticalAlignment="Center" />
+                                    <TextBlock Text="{x:Bind SourceName}" FontSize="11" Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                               TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                                    <TextBlock Text="·" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Text="{x:Bind DateSavedFormatted}" FontSize="11" Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                                </StackPanel>
+
+                                <Grid Grid.Row="3" Margin="12,4,12,10" ColumnDefinitions="*,Auto">
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="0" VerticalAlignment="Center">
+                                        <Button Tag="1" Click="OnStarClick" Background="Transparent" BorderThickness="0" Padding="2" MinWidth="0" MinHeight="0" CornerRadius="4" ToolTipService.ToolTip="Rate 1">
+                                            <FontIcon Glyph="{x:Bind Star1, Mode=OneWay}" FontSize="15" Foreground="#E8A33D" />
+                                        </Button>
+                                        <Button Tag="2" Click="OnStarClick" Background="Transparent" BorderThickness="0" Padding="2" MinWidth="0" MinHeight="0" CornerRadius="4" ToolTipService.ToolTip="Rate 2">
+                                            <FontIcon Glyph="{x:Bind Star2, Mode=OneWay}" FontSize="15" Foreground="#E8A33D" />
+                                        </Button>
+                                        <Button Tag="3" Click="OnStarClick" Background="Transparent" BorderThickness="0" Padding="2" MinWidth="0" MinHeight="0" CornerRadius="4" ToolTipService.ToolTip="Rate 3">
+                                            <FontIcon Glyph="{x:Bind Star3, Mode=OneWay}" FontSize="15" Foreground="#E8A33D" />
+                                        </Button>
+                                        <Button Tag="4" Click="OnStarClick" Background="Transparent" BorderThickness="0" Padding="2" MinWidth="0" MinHeight="0" CornerRadius="4" ToolTipService.ToolTip="Rate 4">
+                                            <FontIcon Glyph="{x:Bind Star4, Mode=OneWay}" FontSize="15" Foreground="#E8A33D" />
+                                        </Button>
+                                        <Button Tag="5" Click="OnStarClick" Background="Transparent" BorderThickness="0" Padding="2" MinWidth="0" MinHeight="0" CornerRadius="4" ToolTipService.ToolTip="Rate 5">
+                                            <FontIcon Glyph="{x:Bind Star5, Mode=OneWay}" FontSize="15" Foreground="#E8A33D" />
+                                        </Button>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                        <FontIcon Glyph="&#xE70B;" FontSize="11" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" Visibility="{x:Bind NoteVisibility, Mode=OneWay}" />
+                                        <Border Visibility="{x:Bind OfflineVisibility, Mode=OneWay}" VerticalAlignment="Center"
+                                                Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}" CornerRadius="4" Padding="6,1">
+                                            <StackPanel Orientation="Horizontal" Spacing="3">
+                                                <FontIcon Glyph="&#xE73E;" FontSize="9" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                                <TextBlock Text="Offline" FontSize="10" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- Unread dot -->
+                                <Ellipse Grid.Row="0" Width="10" Height="10" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8"
+                                         Fill="{ThemeResource AccentFillColorDefaultBrush}" Stroke="White" StrokeThickness="1"
+                                         Visibility="{x:Bind UnreadDot, Mode=OneWay}" />
+
+                                <!-- Hover + selection overlays -->
+                                <Border x:Name="CardHover" Grid.RowSpan="4" CornerRadius="8" BorderThickness="1.5" IsHitTestVisible="False"
+                                        BorderBrush="{ThemeResource AccentFillColorSecondaryBrush}" Opacity="0" />
+                                <Border Grid.RowSpan="4" CornerRadius="8" BorderThickness="2" IsHitTestVisible="False"
+                                        BorderBrush="{ThemeResource AccentFillColorDefaultBrush}"
+                                        Visibility="{x:Bind SelectionVisibility, Mode=OneWay}" />
+                                <Border Grid.Row="0" Width="24" Height="24" CornerRadius="12" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="6"
+                                        Background="{ThemeResource AccentFillColorDefaultBrush}" IsHitTestVisible="False"
+                                        Visibility="{x:Bind SelectionVisibility, Mode=OneWay}">
+                                    <FontIcon Glyph="&#xE73E;" FontSize="13" Foreground="White" />
+                                </Border>
+                            </Grid>
+                        </DataTemplate>
+                    </GridView.ItemTemplate>
+                </GridView>
+
+                <!-- SKELETON (first load) -->
+                <ItemsControl x:Name="Skeleton" Grid.Row="1" Visibility="Collapsed" Padding="16" IsHitTestVisible="False">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="10" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+
+                <!-- EMPTY STATE -->
+                <StackPanel x:Name="EmptyState" Grid.Row="1" Visibility="Collapsed" VerticalAlignment="Center"
+                            HorizontalAlignment="Center" Spacing="14" MaxWidth="360">
+                    <Border Width="84" Height="84" CornerRadius="42" HorizontalAlignment="Center"
+                            Background="{ThemeResource SubtleFillColorSecondaryBrush}">
+                        <FontIcon Glyph="&#xE736;" FontSize="38" Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                    </Border>
+                    <TextBlock x:Name="EmptyText" Text="Nothing here yet." HorizontalAlignment="Center" TextAlignment="Center"
+                               FontSize="15" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    <Button x:Name="EmptyActionButton" Visibility="Collapsed" HorizontalAlignment="Center"
+                            Style="{ThemeResource AccentButtonStyle}" Click="OnEmptyAction" />
+                </StackPanel>
+
+                <!-- LOADING -->
+                <ProgressRing x:Name="LoadingRing" Grid.Row="1" Width="40" Height="40" IsActive="False" Visibility="Collapsed"
+                              HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                <!-- INFO BAR (transient toasts) -->
+                <InfoBar x:Name="MainInfoBar" Grid.Row="1" IsOpen="False" IsClosable="True"
+                         VerticalAlignment="Top" Margin="16,12" MaxWidth="560" HorizontalAlignment="Center" />
+
+                <!-- SELECTION ACTION PILL (multi-select) -->
+                <Border x:Name="SelectionBar" Grid.Row="1" Visibility="Collapsed"
+                        VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,20"
+                        Padding="14,8" CornerRadius="26" Background="{ThemeResource AccentFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource SurfaceStrokeColorDefaultBrush}" BorderThickness="1">
+                    <Border.Shadow>
+                        <ThemeShadow />
+                    </Border.Shadow>
+                    <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                        <TextBlock x:Name="SelectionCount" Text="0 selected" Foreground="White" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" Margin="6,0,8,0" />
+                        <!-- Normal-view batch actions (hidden in the Recycle Bin) -->
+                        <StackPanel x:Name="BatchNormalActions" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <Button Background="Transparent" BorderThickness="0" Foreground="White">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <SymbolIcon Symbol="Tag" /><TextBlock Text="Add tag" />
+                                </StackPanel>
+                                <Button.Flyout>
+                                    <Flyout>
+                                        <AutoSuggestBox x:Name="AddTagBox" Width="240" PlaceholderText="Tag name, Enter to apply"
+                                                        QuerySubmitted="OnBatchAddTag" />
+                                    </Flyout>
+                                </Button.Flyout>
+                            </Button>
+                            <Button Background="Transparent" BorderThickness="0" Foreground="White">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <SymbolIcon Symbol="Clear" /><TextBlock Text="Remove tag" />
+                                </StackPanel>
+                                <Button.Flyout>
+                                    <Flyout>
+                                        <AutoSuggestBox x:Name="RemoveTagBox" Width="240" PlaceholderText="Tag to remove, Enter"
+                                                        QuerySubmitted="OnBatchRemoveTag" />
+                                    </Flyout>
+                                </Button.Flyout>
+                            </Button>
+                            <Button Content="Mark read" Background="Transparent" BorderThickness="0" Foreground="White" Click="OnBatchMarkRead" />
+                            <Button Content="Archive" Background="Transparent" BorderThickness="0" Foreground="White" Click="OnBatchArchive" />
+                        </StackPanel>
+                        <!-- Recycle-Bin-only: Restore -->
+                        <Button x:Name="BatchRestoreButton" Visibility="Collapsed" Background="Transparent" BorderThickness="0" Foreground="White" Click="OnBatchRestore">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <SymbolIcon Symbol="Undo" /><TextBlock Text="Restore" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="BatchDeleteButton" Background="Transparent" BorderThickness="0" Foreground="White" Click="OnBatchDelete"
+                                ToolTipService.ToolTip="Delete selected">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <SymbolIcon Symbol="Delete" /><TextBlock x:Name="BatchDeleteText" Text="Delete" />
+                            </StackPanel>
+                        </Button>
+                        <Button Background="Transparent" BorderThickness="0" Foreground="White" Click="OnClearSelection"
+                                AutomationProperties.Name="Clear selection" ToolTipService.ToolTip="Clear selection">
+                            <SymbolIcon Symbol="Cancel" />
+                        </Button>
+                    </StackPanel>
+                </Border>
+
+                <!-- STATUS BAR -->
+                <Grid Grid.Row="2" Padding="16,6" ColumnDefinitions="*,Auto" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel Grid.Column="0" Spacing="4" VerticalAlignment="Center">
+                        <TextBlock x:Name="StatusText" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <ProgressBar x:Name="DownloadProgress" Height="4" Maximum="100" Value="0" Visibility="Collapsed"
+                                     Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <Button x:Name="PauseResumeButton" Content="Pause" Visibility="Collapsed" Click="OnPauseResumeClick" Padding="12,4" />
+                        <Button x:Name="StopButton" Content="Stop" Visibility="Collapsed" Click="OnStopClick" Padding="12,4" />
+                        <ProgressRing x:Name="SyncProgress" IsActive="False" Width="20" Height="20" />
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </NavigationView>
+    </Grid>
+</Window>

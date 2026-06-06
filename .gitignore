@@ -1,0 +1,46 @@
+# Build outputs
+bin/
+obj/
+publish_out/
+Installer/Output/
+*.exe
+*.dll
+*.pdb
+
+# Local app data (cached DB, articles, settings, token)
+data/
+
+# Visual Studio
+.vs/
+*.user
+*.sln.iml
+.vscode/
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# Package management
+packages/
+.nuget/
+
+# Project-specific
+**/token.txt
+*.db
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Internal dev notes (not part of the public repo)
+BUILD_AND_DISTRIBUTE.md
+SETUP.md
+NOTES.md
+OFFLINE_GUIDE.md
+OFFLINE_UPDATES.md
+PORTABLE_ARCHITECTURE.md
+INSTALLER_GUIDE.md
+design/
+Installer/empty.txt

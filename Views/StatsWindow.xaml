@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="PocketReader.StatsWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="Statistics">
+
+    <Grid x:Name="RootGrid" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}" RowDefinitions="Auto,*,Auto">
+
+        <Grid.Resources>
+            <Style x:Key="Card" TargetType="Border">
+                <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
+                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
+                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="CornerRadius" Value="8" />
+                <Setter Property="Padding" Value="16,14" />
+            </Style>
+            <Style x:Key="StatNumber" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="26" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+            </Style>
+            <Style x:Key="StatLabel" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="12" />
+                <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+            </Style>
+            <Style x:Key="Group" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="13" />
+                <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
+                <Setter Property="Margin" Value="2,8,0,2" />
+            </Style>
+        </Grid.Resources>
+
+        <StackPanel Grid.Row="0" Padding="24,20,24,6" Spacing="2">
+            <TextBlock Text="Reading statistics" FontSize="26" FontWeight="SemiBold" />
+            <TextBlock Text="Your activity in PocketReader." FontSize="12"
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" Padding="24,4,24,12" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="16" MaxWidth="780" HorizontalAlignment="Stretch">
+
+                <!-- Headline cards -->
+                <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="12">
+                    <Border Grid.Column="0" Style="{StaticResource Card}">
+                        <StackPanel Spacing="2">
+                            <TextBlock x:Name="StatArticles" Text="—" Style="{StaticResource StatNumber}" />
+                            <TextBlock Text="Articles read" Style="{StaticResource StatLabel}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="1" Style="{StaticResource Card}">
+                        <StackPanel Spacing="2">
+                            <TextBlock x:Name="StatWords" Text="—" Style="{StaticResource StatNumber}" />
+                            <TextBlock Text="Words read" Style="{StaticResource StatLabel}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="2" Style="{StaticResource Card}">
+                        <StackPanel Spacing="2">
+                            <TextBlock x:Name="StatTime" Text="—" Style="{StaticResource StatNumber}" />
+                            <TextBlock Text="Time spent" Style="{StaticResource StatLabel}" />
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="3" Style="{StaticResource Card}">
+                        <StackPanel Spacing="2">
+                            <TextBlock x:Name="StatStreak" Text="—" Style="{StaticResource StatNumber}" />
+                            <TextBlock Text="Day streak" Style="{StaticResource StatLabel}" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <!-- Activity chart -->
+                <TextBlock Text="Last 30 days" Style="{StaticResource Group}" />
+                <Border Style="{StaticResource Card}">
+                    <StackPanel Spacing="10">
+                        <Grid x:Name="ChartPanel" Height="90" HorizontalAlignment="Stretch" />
+                        <TextBlock x:Name="ChartHint" FontSize="11"
+                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Top sources & tags -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <StackPanel Grid.Column="0" Spacing="4">
+                        <TextBlock Text="Top sources" Style="{StaticResource Group}" />
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel x:Name="SourcesPanel" Spacing="8" />
+                        </Border>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Spacing="4">
+                        <TextBlock Text="Top tags" Style="{StaticResource Group}" />
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel x:Name="TagsPanel" Spacing="8" />
+                        </Border>
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock x:Name="LibraryLine" FontSize="12" Margin="2,4,0,0"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" BorderThickness="0,1,0,0" BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}" Padding="24,12">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock x:Name="StatusLine" Grid.Column="0" VerticalAlignment="Center" FontSize="12"
+                           Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                <Button Grid.Column="1" Content="Close" Click="OnClose" Style="{ThemeResource AccentButtonStyle}" MinWidth="92" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

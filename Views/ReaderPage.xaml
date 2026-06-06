@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="PocketReader.ReaderPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:Microsoft.UI.Xaml.Controls"
+    Title="PocketReader">
+
+    <Grid x:Name="RootLayout" RowDefinitions="Auto,Auto,*,Auto" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Grid.KeyboardAccelerators>
+            <KeyboardAccelerator Key="Escape" Invoked="OnEscInvoked" />
+        </Grid.KeyboardAccelerators>
+
+        <!-- TITLE BAR (custom drag region) -->
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="44" Padding="14,0,0,0"
+              Background="Transparent" ColumnDefinitions="Auto,*,Auto">
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <FontIcon Glyph="&#xE8F1;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                <TextBlock x:Name="TitleBarText" Text="PocketReader" VerticalAlignment="Center"
+                           FontSize="12" FontWeight="SemiBold"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+
+            <!-- Slim, always-visible toolbar lives in the title bar -->
+            <StackPanel Grid.Column="1" x:Name="ToolbarPanel" Orientation="Horizontal" Spacing="2"
+                        HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,16,0">
+                <Button Click="OnCloseClick" Background="Transparent" BorderThickness="0"
+                        ToolTipService.ToolTip="Back to library (Esc)"
+                        Padding="10,6" MinWidth="0">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <FontIcon Glyph="&#xE72B;" FontSize="13" />
+                        <TextBlock Text="Library" FontSize="12" />
+                    </StackPanel>
+                </Button>
+                <Border Width="1" Margin="6,8" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                <Button Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Reading theme" Padding="8,6" MinWidth="0">
+                    <FontIcon Glyph="&#xE771;" FontSize="14" />
+                    <Button.Flyout>
+                        <MenuFlyout>
+                            <RadioMenuFlyoutItem x:Name="ThemeLightItem" Text="Light" GroupName="rt" Click="OnThemeLight" />
+                            <RadioMenuFlyoutItem x:Name="ThemeSepiaItem" Text="Sepia" GroupName="rt" Click="OnThemeSepia" />
+                            <RadioMenuFlyoutItem x:Name="ThemeDarkItem" Text="Dark" GroupName="rt" Click="OnThemeDark" />
+                        </MenuFlyout>
+                    </Button.Flyout>
+                </Button>
+                <Button Click="OnFontDec" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Smaller text" Padding="8,6" MinWidth="0">
+                    <FontIcon Glyph="&#xE8E7;" FontSize="14" />
+                </Button>
+                <Button Click="OnFontInc" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Larger text" Padding="8,6" MinWidth="0">
+                    <FontIcon Glyph="&#xE8E8;" FontSize="14" />
+                </Button>
+                <Border Width="1" Margin="6,8" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                <Button Click="OnHighlightClick" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Highlight selected text" Padding="8,6" MinWidth="0">
+                    <FontIcon Glyph="&#xE7E6;" FontSize="14" />
+                </Button>
+                <Button Click="OnListenClick" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Listen (text-to-speech)" Padding="8,6" MinWidth="0">
+                    <FontIcon x:Name="ListenIcon" Glyph="&#xE768;" FontSize="14" />
+                </Button>
+                <Button Click="OnExportPdfClick" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Export to PDF" Padding="8,6" MinWidth="0">
+                    <FontIcon Glyph="&#xE749;" FontSize="14" />
+                </Button>
+                <Border Width="1" Margin="6,8" Background="{ThemeResource DividerStrokeColorDefaultBrush}" />
+                <Button Click="OnCopyUrlClick" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Copy link" Padding="8,6" MinWidth="0">
+                    <FontIcon Glyph="&#xE8C8;" FontSize="14" />
+                </Button>
+                <Button Click="OnOpenInBrowserClick" Background="Transparent" BorderThickness="0" ToolTipService.ToolTip="Open in browser" Padding="8,6" MinWidth="0">
+                    <FontIcon Glyph="&#xE774;" FontSize="14" />
+                </Button>
+            </StackPanel>
+
+            <!-- Drag region spacer aligning with system caption buttons -->
+            <Grid Grid.Column="2" Width="138" />
+        </Grid>
+
+        <!-- META STRIP: favicon · source · read time · offline pill -->
+        <Border Grid.Row="1" Padding="44,6,44,10"
+                BorderThickness="0,0,0,1" BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}">
+            <Grid ColumnDefinitions="Auto,Auto,Auto,Auto,*,Auto" ColumnSpacing="8" VerticalAlignment="Center">
+                <Image x:Name="MetaFavicon" Grid.Column="0" Width="16" Height="16" VerticalAlignment="Center" />
+                <TextBlock x:Name="MetaSource" Grid.Column="1" FontSize="12"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="2" Text="·" FontSize="12" VerticalAlignment="Center"
+                           Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                <TextBlock x:Name="ReadTimeBlock" Grid.Column="3" FontSize="12"
+                           Foreground="{ThemeResource TextFillColorTertiaryBrush}" VerticalAlignment="Center" />
+                <!-- UrlBlock retained (used by ShowArticle) but kept hidden in the strip -->
+                <TextBlock x:Name="UrlBlock" Grid.Column="4" FontSize="12" Margin="14,0,0,0"
+                           Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                           TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                <Border x:Name="OfflineIndicator" Grid.Column="5" Visibility="Collapsed"
+                        Background="{ThemeResource SystemFillColorSuccessBackgroundBrush}"
+                        CornerRadius="10" Padding="8,2" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <FontIcon Glyph="&#xE73E;" FontSize="9" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                        <TextBlock Text="Offline" FontSize="11" Foreground="{ThemeResource SystemFillColorSuccessBrush}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- ARTICLE BODY (WebView2 fills) with a thin reading-progress bar on top -->
+        <Grid Grid.Row="2">
+            <Border x:Name="WebShell">
+                <controls:WebView2 x:Name="ContentWebView" />
+            </Border>
+            <ProgressBar x:Name="ReaderProgress" Maximum="100" Value="0" Height="3"
+                         VerticalAlignment="Top" Background="Transparent"
+                         Foreground="{ThemeResource AccentFillColorDefaultBrush}" IsHitTestVisible="False" />
+        </Grid>
+
+        <!-- BOTTOM PANEL: tags, suggestions, note (theme-aware background) -->
+        <Border Grid.Row="3" x:Name="BottomPanel"
+                BorderThickness="0,1,0,0" BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                Background="{ThemeResource LayerFillColorDefaultBrush}">
+            <controls:Expander x:Name="TagsExpander" IsExpanded="False"
+                               HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                               ExpandDirection="Up" Background="Transparent" BorderThickness="0"
+                               Padding="44,4,44,12">
+                <controls:Expander.Header>
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <FontIcon Glyph="&#xE8EC;" FontSize="14" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                        <TextBlock Text="Tags &amp; note" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <TextBlock x:Name="TagCountHint" FontSize="12" VerticalAlignment="Center"
+                                   Foreground="{ThemeResource TextFillColorTertiaryBrush}" />
+                    </StackPanel>
+                </controls:Expander.Header>
+                <ScrollViewer MaxHeight="300" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+                <StackPanel Spacing="14">
+                    <!-- Suggested tags -->
+                    <StackPanel x:Name="SuggestSection" Spacing="6" Visibility="Collapsed">
+                        <TextBlock Text="Suggested" FontSize="11" FontWeight="SemiBold"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <ScrollViewer HorizontalScrollBarVisibility="Auto" HorizontalScrollMode="Auto"
+                                      VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Hidden">
+                            <StackPanel x:Name="SuggestPanel" Orientation="Horizontal" Spacing="8" />
+                        </ScrollViewer>
+                    </StackPanel>
+
+                    <!-- Current tags + add box -->
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="On this article" FontSize="11" FontWeight="SemiBold"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <ScrollViewer Grid.Column="0" HorizontalScrollBarVisibility="Auto"
+                                          HorizontalScrollMode="Auto"
+                                          VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Hidden">
+                                <ContentControl x:Name="TagsControl" />
+                            </ScrollViewer>
+                            <AutoSuggestBox x:Name="TagsBox" Grid.Column="1" Width="220"
+                                            PlaceholderText="Add tag…" QuerySubmitted="OnTagsSubmitted">
+                                <AutoSuggestBox.QueryIcon>
+                                    <FontIcon Glyph="&#xE710;" />
+                                </AutoSuggestBox.QueryIcon>
+                            </AutoSuggestBox>
+                        </Grid>
+                    </StackPanel>
+
+                    <!-- Note -->
+                    <StackPanel Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE70B;" FontSize="11"
+                                      Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}" />
+                            <TextBlock Text="My note" FontSize="11" FontWeight="SemiBold"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <TextBox x:Name="NoteBox" AcceptsReturn="True" TextWrapping="Wrap"
+                                 MinHeight="56" MaxHeight="140"
+                                 PlaceholderText="Write a private note about this article…"
+                                 LostFocus="OnNoteLostFocus" />
+                    </StackPanel>
+                </StackPanel>
+                </ScrollViewer>
+            </controls:Expander>
+        </Border>
+    </Grid>
+</Window>

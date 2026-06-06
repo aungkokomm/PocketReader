@@ -20,6 +20,8 @@ PocketReader fills that gap. Point it at your Raindrop account once, and it **fe
 
 > **Raindrop is where you save. PocketReader is where you read, keep, and come back.**
 
+📖 **New here? Start with the [User Guide](USER_GUIDE.md).**
+
 ---
 
 ## What makes it different

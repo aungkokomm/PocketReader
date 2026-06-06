@@ -3,6 +3,7 @@
 ### Pocket is gone. Your reading list shouldn't be.
 
 **PocketReader is a portable Windows app that turns your Raindrop.io bookmarks into a fast, private, fully-offline reading library — one you actually own.** Save articles in Raindrop like always. PocketReader pulls them down, archives the full text on your disk, and gives you a calm place to read, search, highlight, and revisit them — online or off, with no subscription and no server.
+<img width="960" height="509" alt="image" src="https://github.com/user-attachments/assets/05876c5f-8ff9-4ba7-9773-613aa6b33f97" />
 
 ---
 

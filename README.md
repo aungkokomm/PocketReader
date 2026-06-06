@@ -48,7 +48,13 @@ Built with WinUI 3 — Mica material, light/dark, a proper distraction-free read
 | Suggested tags | ✅ Smart tag suggestions + auto-tag, computed locally |
 
 **…and things Raindrop doesn't do at all:**
-🔊 Offline text-to-speech · 📄 Export to PDF · 📈 Reading statistics · ⭐ Star ratings · ⏯ Reading progress & resume · 🗑 Recycle Bin
+
+🔊 Offline text-to-speech · 
+📄 Export to PDF · 
+📈 Reading statistics · 
+⭐ Star ratings · 
+⏯ Reading progress & resume · 
+🗑 Recycle Bin
 
 ---
 

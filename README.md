@@ -106,6 +106,9 @@ dotnet build -c Release -p:Platform=x64
 
 Browser OAuth credentials are intentionally **not** included in this repository. To enable one‑click browser sign‑in, create your own app at Raindrop → Settings → Integrations (redirect URI `http://localhost:8080/callback`) and set the `RaindropClientId` / `RaindropClientSecret` constants in `MainWindow.xaml.cs`. Otherwise, use **Sign in with a token** — it needs no app credentials.
 
+## License
+Released under the [MIT License](LICENSE).
+
 ---
 
 *PocketReader isn't a Raindrop replacement — it's the reading half Raindrop leaves out, and the Pocket-shaped hole it left behind.*

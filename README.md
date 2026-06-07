@@ -1,5 +1,12 @@
 # PocketReader
 
+<p align="center">
+  <a href="https://github.com/aungkokomm/PocketReader/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/aungkokomm/PocketReader?style=flat-square&label=LATEST&labelColor=4d4d4d&color=2f81f7"></a>
+  <a href="https://github.com/aungkokomm/PocketReader/stargazers"><img alt="Stars" src="https://img.shields.io/github/stars/aungkokomm/PocketReader?style=flat-square&label=STARS&labelColor=4d4d4d&color=2f81f7"></a>
+  <a href="https://github.com/aungkokomm/PocketReader/releases"><img alt="Downloads" src="https://img.shields.io/github/downloads/aungkokomm/PocketReader/total?style=flat-square&label=DOWNLOADS&labelColor=4d4d4d&color=3fb950"></a>
+  <a href="https://github.com/aungkokomm/PocketReader/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/aungkokomm/PocketReader?style=flat-square&label=LICENSE&labelColor=4d4d4d&color=3fb950"></a>
+</p>
+
 ### Pocket is gone. Your reading list shouldn't be.
 
 **PocketReader is a portable Windows app that turns your Raindrop.io bookmarks into a fast, private, fully-offline reading library — one you actually own.** Save articles in Raindrop like always. PocketReader pulls them down, archives the full text on your disk, and gives you a calm place to read, search, highlight, and revisit them — online or off, with no subscription and no server.

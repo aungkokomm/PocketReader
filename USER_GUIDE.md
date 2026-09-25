@@ -6,7 +6,7 @@ Welcome! This guide gets you from zero to reading offline in a few minutes, then
 
 ## 1. Install
 
-1. Download **`PocketReader-Setup-1.8.2.exe`** from the [Releases page](https://github.com/aungkokomm/PocketReader/releases).
+1. Download **`PocketReader-Setup-1.9.0.exe`** from the [Releases page](https://github.com/aungkokomm/PocketReader/releases).
 2. Run it. You don't need administrator rights.
 3. Choose where to install — any folder or drive works (even a USB stick). The app and all your data live together in that one folder, so you can move it anywhere later.
 4. Launch PocketReader.

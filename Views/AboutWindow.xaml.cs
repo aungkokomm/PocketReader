@@ -45,6 +45,6 @@ public sealed partial class AboutWindow : Window
             if (v != null) return $"{v.Major}.{v.Minor}.{v.Build}";
         }
         catch { }
-        return "1.8.2";
+        return "1.9.0";
     }
 }

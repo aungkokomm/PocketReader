@@ -4,7 +4,7 @@
 ; User can install to any drive (C:, D:, E:, USB) without admin rights.
 
 #define MyAppName "PocketReader"
-#define MyAppVersion "1.8.2"
+#define MyAppVersion "1.9.0"
 #define MyAppPublisher "PocketReader"
 #define MyAppExeName "PocketReader.exe"
 #define PublishDir "..\publish_out"
@@ -29,6 +29,9 @@ OutputDir=Output
 OutputBaseFilename=PocketReader-Setup-{#MyAppVersion}
 SetupIconFile=icon.ico
 UninstallDisplayIcon={app}\{#MyAppExeName}
+; Replace the uninstall log instead of appending to it: up to 1.8.2 the log held a step
+; that deleted {app}\data, and an appended log would keep running it.
+UninstallLogMode=overwrite
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -42,9 +45,15 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 ; into the publish folder.
 Source: "{#PublishDir}\*"; DestDir: "{app}"; Excludes: "\data\*,\data,token.txt,*.db"; Flags: recursesubdirs createallsubdirs ignoreversion
 
+[InstallDelete]
+; Up to 1.8.2 the app's resources were in resources.pri; since 1.9.0 they are in
+; PocketReader.pri. A leftover resources.pri is read first, so remove it on upgrade.
+Type: files; Name: "{app}\resources.pri"
+
 [Dirs]
 ; Portable data folder lives next to the exe; writable by the installing user.
-Name: "{app}\data"
+; Kept on uninstall: it holds the user's library.
+Name: "{app}\data"; Flags: uninsneveruninstall
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
@@ -53,7 +62,3 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#MyAppName}}"; Flags: nowait postinstall skipifsilent
-
-[UninstallDelete]
-; Remove the local cache/db on uninstall (portable cleanup).
-Type: filesandordirs; Name: "{app}\data"

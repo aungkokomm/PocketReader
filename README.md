@@ -124,7 +124,7 @@ Browser OAuth credentials are intentionally **not** included in this repository.
 
 ## License
 Released under the [MIT License](LICENSE).
- © 2026 Aung Ko Ko · <a href="https://aungkokomm.github.io/">more of my apps
+<p align="center"><sub>MIT licensed · © 2026 Aung Ko Ko · <a href="https://aungkokomm.github.io/">more of my apps</a></sub></p>
 ---
 
 *PocketReader isn't a Raindrop replacement - it's the reading half Raindrop leaves out, and the Pocket-shaped hole it left behind.*
